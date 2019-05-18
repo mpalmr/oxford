@@ -1,8 +1,9 @@
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
-mod request;
+pub mod request;
 
+// TODO: enum for source_lang
 pub struct Client {
     app_id: String,
     app_key: String,
@@ -10,7 +11,6 @@ pub struct Client {
 }
 
 impl Client {
-    // TODO: enum for source_lang
     pub fn new(app_id: String, app_key: String, language: String) -> Self {
         Self {
             app_id,
@@ -20,7 +20,18 @@ impl Client {
     }
 
     pub fn lookup_word(&self, word: &str) -> Result<request::get_word::Entries, reqwest::Error> {
-        Ok(request::get_word::fetch(word)?)
+        Ok(request::get_word::fetch(&format!(
+            "{}/{}",
+            self.base_url(),
+            word
+        ))?)
+    }
+
+    fn base_url(&self) -> String {
+        format!(
+            "https://od-api.oxforddictionaries.com/api/v2/{}",
+            self.language
+        )
     }
 }
 
@@ -29,10 +40,19 @@ mod tests {
     use super::Client;
 
     #[test]
-    fn new_api() {
-        let api = Client::new("abc".to_string(), "def".to_string(), "en-ca".to_string());
-        assert_eq!(api.app_id, "abc".to_string());
-        assert_eq!(api.app_key, "def".to_string());
-        assert_eq!(api.language, "en-ca".to_string());
+    fn create_client() {
+        let client = Client::new("abc".to_string(), "def".to_string(), "en-ca".to_string());
+        assert_eq!(client.app_id, "abc".to_string());
+        assert_eq!(client.app_key, "def".to_string());
+        assert_eq!(client.language, "en-ca".to_string());
+    }
+
+    #[test]
+    fn get_base_url() {
+        let client = Client::new("abc".to_string(), "def".to_string(), "ghi".to_string());
+        assert_eq!(
+            client.base_url(),
+            "https://od-api.oxforddictionaries.com/api/v2/ghi"
+        );
     }
 }

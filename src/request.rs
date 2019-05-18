@@ -1,16 +1,10 @@
 use reqwest::Client;
 
-const BASE_URL: &str = "https://od-api.oxforddictionaries.com/api/v2";
-
 pub mod get_word {
     use serde::Deserialize;
 
-    pub fn fetch(word: &str) -> Result<Entries, reqwest::Error> {
-        let entries = super::Client::new()
-            .get(&format!("{}/{}", super::BASE_URL, word))
-            .send()?
-            .json()?;
-        Ok(entries)
+    pub fn fetch(url: &str) -> Result<Entries, reqwest::Error> {
+        Ok(super::Client::new().get(url).send()?.json()?)
     }
 
     #[derive(Deserialize)]
@@ -19,28 +13,17 @@ pub mod get_word {
     }
 
     #[derive(Deserialize)]
-    pub struct Item {
-        pub id: String,
-        pub text: String,
-    }
-
-    #[derive(Deserialize)]
-    pub struct TypedItem {
-        pub id: String,
-        pub text: String,
-        pub r#type: String,
-    }
-
-    #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct EntriesResult {
         pub id: String,
         pub language: String,
-        pub lexicalEntries: Vec<LexicalEntry>,
+        pub lexical_entries: Vec<LexicalEntry>,
     }
 
     #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct LexicalEntry {
-        pub derivativeOf: Vec<DerivativeOf>,
+        pub derivative_of: Vec<DerivativeOf>,
         pub derivatives: Vec<Derivative>,
         pub entries: Vec<Entry>,
     }
@@ -65,42 +48,59 @@ pub mod get_word {
     }
 
     #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct Entry {
         pub id: String,
-        pub homographNumber: String,
+        pub homograph_number: String,
         pub etymologies: Vec<String>,
-        pub grammaticalFeatures: Vec<TypedItem>,
+        pub grammatical_features: Vec<TypedItem>,
         pub notes: Vec<TypedItem>,
         pub pronunciations: Vec<Pronunciation>,
         pub senses: Vec<Sense>,
     }
 
     #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct Pronunciation {
-        pub audioFile: String,
-        pub phoneticNotation: String,
-        pub phoneticSpelling: String,
+        pub audio_file: String,
+        pub phonetic_notation: String,
+        pub phonetic_spelling: String,
         pub dialects: Vec<String>,
         pub regions: Vec<Item>,
     }
 
     #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct Sense {
         pub definitions: Vec<String>,
-        pub crossReferenceMarkers: Vec<String>,
+        pub cross_reference_markers: Vec<String>,
         pub domains: Vec<Item>,
-        pub crossReferences: Vec<TypedItem>,
+        pub cross_references: Vec<TypedItem>,
         pub examples: Vec<SenseExample>,
     }
 
     #[derive(Deserialize)]
+    #[serde(rename_all = "snake_case")]
     pub struct SenseExample {
         pub text: String,
         pub definitions: Vec<String>,
         pub domains: Vec<String>,
-        pub senseIds: Vec<String>,
+        pub sense_ids: Vec<String>,
         pub regions: Vec<Item>,
         pub registers: Vec<Item>,
         pub notes: Vec<TypedItem>,
+    }
+
+    #[derive(Deserialize)]
+    pub struct Item {
+        pub id: String,
+        pub text: String,
+    }
+
+    #[derive(Deserialize)]
+    pub struct TypedItem {
+        pub id: String,
+        pub text: String,
+        pub r#type: String,
     }
 }
