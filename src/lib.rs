@@ -1,20 +1,25 @@
-#![warn(rust_2018_idioms)]
-#![warn(clippy::all)]
-#![warn(clippy::pedantic)]
+//! HTTP client for the Oxford dictionary.
+
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+#![deny(rust_2018_idioms)]
+#![warn(missing_docs)]
 
 mod request;
 
 use futures::Future;
 use request::get_word_entries;
 
-// TODO: enum for source_lang
+/// HTTP client containing all keys and other secrets.
 pub struct Client {
     app_id: String,
     app_key: String,
     language: String,
 }
 
+
 impl Client {
+    /// Create a new instance of Client.
     pub fn new(app_id: String, app_key: String, language: String) -> Self {
         Self {
             app_id,
@@ -23,6 +28,7 @@ impl Client {
         }
     }
 
+    /// Looks up the definition of a provided word.
     pub fn lookup_word(&self, word: &str) -> impl Future<Item = (), Error = ()> {
         get_word_entries(&format!("{}/{}", self.base_url(), word))
     }
