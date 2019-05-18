@@ -1,7 +1,11 @@
+#![warn(rust_2018_idioms)]
 #![warn(clippy::all)]
 #![warn(clippy::pedantic)]
 
-pub mod request;
+mod request;
+
+use futures::Future;
+use request::get_word_entries;
 
 // TODO: enum for source_lang
 pub struct Client {
@@ -19,12 +23,8 @@ impl Client {
         }
     }
 
-    pub fn lookup_word(&self, word: &str) -> Result<request::get_word::Entries, reqwest::Error> {
-        Ok(request::get_word::fetch(&format!(
-            "{}/{}",
-            self.base_url(),
-            word
-        ))?)
+    pub fn lookup_word(&self, word: &str) -> impl Future<Item = (), Error = ()> {
+        get_word_entries(&format!("{}/{}", self.base_url(), word))
     }
 
     fn base_url(&self) -> String {
