@@ -1,8 +1,10 @@
 [package]
-name = "oxford-dictionary-api"
+name = "oxford"
 version = "0.0.1"
 authors = ["Matthew Palmer <mspalmer91@gmail.com>"]
 edition = "2018"
+publish = false
+license = "MIT"
 
 [dependencies]
 reqwest = "0.9.17"

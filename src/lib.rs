@@ -5,10 +5,10 @@
 #![deny(rust_2018_idioms)]
 #![warn(missing_docs)]
 
-mod request;
+mod http;
 
 use futures::Future;
-use request::get_word_entries;
+use http::get_word_entries;
 
 /// HTTP client containing all keys and other secrets.
 pub struct Client {
@@ -16,7 +16,6 @@ pub struct Client {
     app_key: String,
     language: String,
 }
-
 
 impl Client {
     /// Create a new instance of Client.
