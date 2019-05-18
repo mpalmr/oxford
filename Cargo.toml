@@ -1,0 +1,10 @@
+[package]
+name = "oxford-dictionary-api"
+version = "0.0.1"
+authors = ["Matthew Palmer <mspalmer91@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+reqwest = "0.9.17"
+tokio = "0.1.20"
+serde = "1.0.91"
