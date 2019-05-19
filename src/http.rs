@@ -11,18 +11,20 @@ pub fn get_word_entries(client: &Client, url: &str) -> impl Future<Item = (), Er
         .map_err(|err| eprintln!("Request error: {}", err))
         .map(|body| {
             let mut body = Cursor::new(body);
-            if let Err(err) = io::copy(&mut body, &mut io::stdout()) {
-                eprintln!("stdout error: {}", err);
+            if let Err(error) = io::copy(&mut body, &mut io::stdout()) {
+                eprintln!("stdout error: {}", error);
+            } else {
+                Ok(body)
             }
         })
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct WordEntries {
     pub results: Vec<EntriesResult>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct EntriesResult {
     pub id: String,
     pub language: String,
@@ -30,7 +32,7 @@ pub struct EntriesResult {
     pub lexical_entries: Vec<LexicalEntry>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
 pub struct LexicalEntry {
     #[serde(rename(deserialize = "derivativeOf"))]
@@ -39,7 +41,7 @@ pub struct LexicalEntry {
     pub entries: Vec<Entry>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DerivativeOf {
     pub id: String,
     pub text: String,
@@ -48,7 +50,7 @@ pub struct DerivativeOf {
     pub regions: Vec<Item>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Derivative {
     pub id: String,
     pub text: String,
@@ -58,7 +60,7 @@ pub struct Derivative {
     pub registers: Vec<Item>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Entry {
     pub id: String,
     #[serde(rename(deserialize = "homographNumber"))]
@@ -71,8 +73,9 @@ pub struct Entry {
     pub senses: Vec<Sense>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Pronunciation {
+    #[serde(rename(deserialize = "audioFile"))]
     pub audio_file: String,
     #[serde(rename(deserialize = "phoneticNotation"))]
     pub phonetic_notation: String,
@@ -82,7 +85,7 @@ pub struct Pronunciation {
     pub regions: Vec<Item>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Sense {
     pub definitions: Vec<String>,
     #[serde(rename(deserialize = "crossReferenceMarkers"))]
@@ -93,7 +96,7 @@ pub struct Sense {
     pub examples: Vec<SenseExample>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct SenseExample {
     pub text: String,
     pub definitions: Vec<String>,
@@ -105,15 +108,30 @@ pub struct SenseExample {
     pub notes: Vec<TypedItem>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Item {
     pub id: String,
     pub text: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct TypedItem {
     pub id: String,
     pub text: String,
     pub r#type: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use reqwest::r#async::Client;
+
+    #[test]
+    fn get_word_entries() {
+        let result = super::get_word_entries(
+            &Client::new(),
+            "https://od-api.oxforddictionaries.com/api/v2/en-ca/work",
+        );
+        println!("result: {:?}", result);
+        assert_eq!(result, result);
+    }
 }

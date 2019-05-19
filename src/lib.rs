@@ -1,12 +1,12 @@
-#![deny(clippy::all)]
-#![deny(clippy::pedantic)]
-#![deny(rust_2018_idioms)]
+#![warn(clippy::all)]
+#![warn(clippy::pedantic)]
+#![warn(rust_2018_idioms)]
 // #![warn(missing_docs)]
 
-mod http;
+use tokio_core::Core;
+use http::{WordEntries, get_word_entries};
 
-use futures::Future;
-use http::get_word_entries;
+mod http;
 
 pub struct Client {
     app_id: String,
@@ -25,9 +25,12 @@ impl Client {
         }
     }
 
-    pub fn lookup_word(&self, word: &str) -> impl Future<Item = (), Error = ()> {
+    pub fn lookup_word(&self, word: &str) -> WordEntries {
         let url = &format!("{}/{}", self.base_url(), word);
-        get_word_entries(&self.client, url)
+        let mut reactor = Core::new().unwrap();
+        let value = reactor.run(get_word_entries(&self.client, url)).unwrap();
+        println!("{:?}", value);
+        value
     }
 
     fn base_url(&self) -> String {
