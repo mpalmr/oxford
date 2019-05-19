@@ -1,9 +1,9 @@
 [package]
 name = "oxford"
 version = "0.0.1"
+publish = false
 authors = ["Matthew Palmer <mspalmer91@gmail.com>"]
 edition = "2018"
-publish = false
 license = "MIT"
 
 [dependencies]

@@ -1,24 +1,19 @@
 use futures::{Future, Stream};
-use reqwest::r#async::{Client, Decoder};
+use reqwest::r#async::Client;
 use serde::Deserialize;
 use std::io::{self, Cursor};
-use std::mem;
 
 pub fn get_word_entries(url: &str) -> impl Future<Item = (), Error = ()> {
     Client::new()
         .get(url)
         .send()
-        .and_then(|mut res| {
-            println!("Status: {}", res.status());
-            let body = mem::replace(res.body_mut(), Decoder::empty());
-            body.concat2()
-        })
+        .and_then(|res| res.into_body().concat2())
         .map_err(|err| eprintln!("Request error: {}", err))
         .map(|body| {
             let mut body = Cursor::new(body);
-            let _ = io::copy(&mut body, &mut io::stdout()).map_err(|err| {
+            if let Err(err) = io::copy(&mut body, &mut io::stdout()) {
                 eprintln!("stdout error: {}", err);
-            });
+            }
         })
 }
 
