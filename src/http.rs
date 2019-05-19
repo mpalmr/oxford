@@ -3,8 +3,8 @@ use reqwest::r#async::Client;
 use serde::Deserialize;
 use std::io::{self, Cursor};
 
-pub fn get_word_entries(url: &str) -> impl Future<Item = (), Error = ()> {
-    Client::new()
+pub fn get_word_entries(client: &Client, url: &str) -> impl Future<Item = (), Error = ()> {
+    client
         .get(url)
         .send()
         .and_then(|res| res.into_body().concat2())
@@ -23,16 +23,17 @@ pub struct WordEntries {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct EntriesResult {
     pub id: String,
     pub language: String,
+    #[serde(rename(deserialize = "lexicalEntries"))]
     pub lexical_entries: Vec<LexicalEntry>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct LexicalEntry {
+    #[serde(rename(deserialize = "derivativeOf"))]
     pub derivative_of: Vec<DerivativeOf>,
     pub derivatives: Vec<Derivative>,
     pub entries: Vec<Entry>,
@@ -58,11 +59,12 @@ pub struct Derivative {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct Entry {
     pub id: String,
+    #[serde(rename(deserialize = "homographNumber"))]
     pub homograph_number: String,
     pub etymologies: Vec<String>,
+    #[serde(rename(deserialize = "grammaticalFeatures"))]
     pub grammatical_features: Vec<TypedItem>,
     pub notes: Vec<TypedItem>,
     pub pronunciations: Vec<Pronunciation>,
@@ -70,31 +72,33 @@ pub struct Entry {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct Pronunciation {
     pub audio_file: String,
+    #[serde(rename(deserialize = "phoneticNotation"))]
     pub phonetic_notation: String,
+    #[serde(rename(deserialize = "phoneticSpelling"))]
     pub phonetic_spelling: String,
     pub dialects: Vec<String>,
     pub regions: Vec<Item>,
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct Sense {
     pub definitions: Vec<String>,
+    #[serde(rename(deserialize = "crossReferenceMarkers"))]
     pub cross_reference_markers: Vec<String>,
     pub domains: Vec<Item>,
+    #[serde(rename(deserialize = "crossReferences"))]
     pub cross_references: Vec<TypedItem>,
     pub examples: Vec<SenseExample>,
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
 pub struct SenseExample {
     pub text: String,
     pub definitions: Vec<String>,
     pub domains: Vec<String>,
+    #[serde(rename(deserialize = "sense_ids"))]
     pub sense_ids: Vec<String>,
     pub regions: Vec<Item>,
     pub registers: Vec<Item>,

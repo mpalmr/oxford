@@ -12,6 +12,7 @@ pub struct Client {
     app_id: String,
     app_key: String,
     language: String,
+    client: reqwest::r#async::Client,
 }
 
 impl Client {
@@ -20,11 +21,13 @@ impl Client {
             app_id,
             app_key,
             language,
+            client: reqwest::r#async::Client::new(),
         }
     }
 
     pub fn lookup_word(&self, word: &str) -> impl Future<Item = (), Error = ()> {
-        get_word_entries(&format!("{}/{}", self.base_url(), word))
+        let url = &format!("{}/{}", self.base_url(), word);
+        get_word_entries(&self.client, url)
     }
 
     fn base_url(&self) -> String {
